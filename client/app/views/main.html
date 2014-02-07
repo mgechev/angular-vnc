@@ -1,1 +1,27 @@
-<vnc-screen></vnc-screen>
+<div class="container">
+
+  <div class="row" style="margin-top:20px">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
+      <form role="form" name="vnc-form" novalidate>
+        <fieldset>
+          <h2>VNC Login</h2>
+          <hr class="colorgraph">
+          <div class="form-group">
+              <input type="text" name="hostname" id="hostname-input" class="form-control input-lg" placeholder="Hostname" ng-model="host.name" required ng-minlength="3">
+          </div>
+          <div class="form-group">
+              <input type="number" min="1" max="65535" name="port" id="port-input" class="form-control input-lg" placeholder="Port" ng-model="host.port" required>
+          </div>
+          <div class="form-group">
+              <input type="password" name="password" id="password-input" class="form-control input-lg" placeholder="Password" ng-model="host.password">
+          </div>
+          <div class="form-group">
+              <a href="" class="btn btn-lg btn-primary btn-block" ng-click="login()">Login</a>
+          </div>
+          <hr class="colorgraph">
+        </fieldset>
+      </form>
+    </div>
+  </div>
+
+</div>

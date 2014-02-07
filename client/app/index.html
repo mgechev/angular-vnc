@@ -25,7 +25,7 @@
     <![endif]-->
 
     <!-- Add your site or application content here -->
-    <div class="container" ng-include="'views/main.html'" ng-controller="MainCtrl"></div>
+    <div ng-view></div>
 
     <!--[if lt IE 9]>
     <script src="bower_components/es5-shim/es5-shim.js"></script>
@@ -36,6 +36,7 @@
     <!-- bower:js -->
     <script src="bower_components/jquery/jquery.js"></script>
     <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
@@ -46,6 +47,7 @@
         <script src="scripts/directives/vnc-screen.js"></script>
         <script src="scripts/services/VNCClient.js"></script>
         <script src="scripts/services/Io.js"></script>
+        <script src="scripts/controllers/vnc.js"></script>
         <!-- endbuild -->
 </body>
 </html>
