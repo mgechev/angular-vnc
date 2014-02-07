@@ -79,6 +79,7 @@ body {
 }
 
 .colorgraph {
+  margin-bottom: 7px;
   height: 5px;
   border-top: 0;
   background: #c4e17f;
@@ -91,4 +92,11 @@ body {
 
 form.ng-invalid.ng-dirty input.ng-invalid {
   border-color: #ff0000 !important;
+}
+
+.form-error {
+  width: 100%;
+  height: 25px;
+  color: red;
+  text-align: center;
 }

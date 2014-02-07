@@ -1,73 +1,87 @@
 'use strict';
 
-function VNCClient(Io) {
-  //this.screen = screen;
-  //this.vncClientScreen = vncClientScreen;
-}
+var CONNECTION_TIMEOUT = 2000;
 
-VNCClient.prototype.initEventListeners = function () {
-  var self = this;
-  this.screen.addMouseHandler(function (x, y, mask) {
-    self.socket.emit('mouse', {
+function VNCClient($q, Io) {
+
+  this.frameCallbacks = [];
+
+  this.addFrameCallback = function (fn) {
+    this.frameCallbacks.push(fn);
+  };
+
+  this.removeFrameCallback = function (fn) {
+    var cbs = this.frameCallbacks;
+    cbs.splice(cbs.indexOf(fn), 1);
+  };
+
+  this.sendMouseEvent = function (x, y, mask) {
+    this.socket.emit('mouse', {
       x: x,
       y: y,
       button: mask
     });
-  });
-  this.screen.addKeyboardHandlers(function (code, shift, isDown) {
-    var rfbKey = self.toRfbKeyCode(code, shift, isDown);
+  };
+
+  this.sendKeyboardEvent = function (code, shift, isDown) {
+    var rfbKey = this.toRfbKeyCode(code, shift, isDown);
     if (rfbKey)
-      self.socket.emit('keyboard', {
+      this.socket.emit('keyboard', {
         keyCode: rfbKey,
         isDown: isDown
       });
-  });
-};
+  };
 
-VNCClient.prototype.connect = function (config) {
-  var self = this;
-  if (config.forceNewConnection) {
-    this.socket = io.connect(Config.URL);
-  } else {
-    this.socket = io.connect(Config.URL, { 'force new connection': true });
-  }
-  this.socket.emit('init', {
-    host: config.host,
-    port: config.port,
-    password: config.password
-  });
-  this.addHandlers(config.success);
-  this.initEventListeners();
-  this.connectionTimeout = setTimeout(function () {
-    self.disconnect();
-    config.error();
-  }, Config.CONNECTION_TIMEOUT);
-};
+  this.connect = function (config) {
+    var deferred = $q.defer(),
+        self = this;
+    if (config.forceNewConnection) {
+      this.socket = Io.connect(config.proxyUrl);
+    } else {
+      this.socket = Io.connect(config.proxyUrl, { 'force new connection': true });
+    }
+    this.socket.emit('init', {
+      host: config.host,
+      port: config.port,
+      password: config.password
+    });
+    this.addHandlers();
+    this.setConnectionTimeout(deferred);
+    this.socket.on('init', function (config) {
+      clearTimeout(self.connectionTimeout);
+      deferred.resolve();
+    });
+    return deferred.promise;
+  };
 
-VNCClient.prototype.disconnect = function () {
-  this.socket.disconnect();
-};
+  this.disconnect = function () {
+    this.socket.disconnect();
+  };
 
-VNCClient.prototype.addHandlers = function (success) {
-  var self = this;
-  this.socket.on('init', function (config) {
-    var canvas = self.vncClientScreen.getCanvas();
-    canvas.width = config.width;
-    canvas.height = config.height;
-    self.screen.resize();
-    clearTimeout(self.connectionTimeout);
-    if (typeof success === 'function') success();
-  });
-  this.socket.on('frame', function (frame) {
-    self.vncClientScreen.drawRect(frame);
-  });
-};
+  this.setConnectionTimeout = function (deferred) {
+    var self = this;
+    this.connectionTimeout = setTimeout(function () {
+      self.disconnect();
+      deferred.reject();
+    }, CONNECTION_TIMEOUT);
+  };
 
-VNCClient.prototype.toRfbKeyCode = function (code, shift) {
-  for (var i = 0, m = keyMap.length; i < m; i++)
-    if (code == keyMap[i][0])
-      return keyMap[i][shift ? 2 : 1];
-  return null;
-};
+  this.addHandlers = function (success) {
+    var self = this;
+    this.socket.on('frame', function (frame) {
+      self.frameCallbacks.forEach(function (cb) {
+        cb.call(null, frame);
+      });
+    });
+  };
+
+  this.toRfbKeyCode = function (code, shift) {
+    for (var i = 0, m = keyMap.length; i < m; i++)
+      if (code == keyMap[i][0])
+        return keyMap[i][shift ? 2 : 1];
+    return null;
+  };
+
+}
 
 angular.module('clientApp').service('VNCClient', VNCClient);
