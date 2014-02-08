@@ -4,6 +4,7 @@ function Screen(canvas, buffer) {
   var bufferCanvas = buffer.getCanvas();
   this.originalWidth = bufferCanvas.width;
   this.originalHeight = bufferCanvas.height;
+  this.buffer = buffer;
   this.canvas = canvas;
   this.context = canvas.getContext('2d');
   this.resize(bufferCanvas);
@@ -11,8 +12,9 @@ function Screen(canvas, buffer) {
 
 Screen.prototype.resize = function (canvas) {
   var ratio = canvas.width / canvas.height,
-      width = window.innerWidth,
-      height = window.innerHeight;
+      parent = this.canvas.parentNode,
+      width = parent.offsetWidth,
+      height = parent.offsetHeight;
   this.canvas.width = width;
   this.canvas.height = width / ratio;
   if (this.canvas.height > height) {
@@ -34,7 +36,7 @@ Screen.prototype.addMouseHandler = function (cb) {
 
   function getMousePosition(x, y) {
     var c = self.canvas,
-        //get the width and height of the base canvas
+        oc = self.buffer.getCanvas(),
         pos = c.getBoundingClientRect(),
         width = c.width,
         height = c.height,
@@ -133,7 +135,7 @@ VNCClientScreen.prototype.getCanvas = function () {
 
 var VNCScreenDirective = function (VNCClient) {
   return {
-    template: '<canvas></canvas>',
+    template: '<canvas class="vnc-screen"></canvas>',
     replace: true,
     restrict: 'E',
     link: function postLink(scope, element, attrs) {

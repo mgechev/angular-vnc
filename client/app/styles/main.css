@@ -1,3 +1,7 @@
+html,body {
+  height: 100%;
+}
+
 /* Space out content a bit */
 body {
   padding-top: 20px;
@@ -99,4 +103,19 @@ form.ng-invalid.ng-dirty input.ng-invalid {
   height: 25px;
   color: red;
   text-align: center;
+}
+
+.screen-wrapper {
+  width: 40%;
+  height: 100%;
+  margin: auto;
+}
+
+.vnc-screen {
+  box-shadow: 0px 0px 30px #333;
+  cursor: none;
+}
+
+div[ng-view] {
+  height: 100%;
 }
