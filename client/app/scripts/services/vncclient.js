@@ -10,6 +10,12 @@ function VNCClient($q, Io) {
     this.frameCallbacks.push(fn);
   };
 
+  this.update = function (frame) {
+    this.frameCallbacks.forEach(function (cb) {
+      cb.call(null, frame);
+    });
+  };
+
   this.removeFrameCallback = function (fn) {
     var cbs = this.frameCallbacks;
     cbs.splice(cbs.indexOf(fn), 1);
@@ -48,6 +54,8 @@ function VNCClient($q, Io) {
     this.addHandlers();
     this.setConnectionTimeout(deferred);
     this.socket.on('init', function (config) {
+      self.screenWidth = config.width;
+      self.screenHeight = config.height;
       self.connected = true;
       clearTimeout(self.connectionTimeout);
       deferred.resolve();
@@ -71,9 +79,7 @@ function VNCClient($q, Io) {
   this.addHandlers = function (success) {
     var self = this;
     this.socket.on('frame', function (frame) {
-      self.frameCallbacks.forEach(function (cb) {
-        cb.call(null, frame);
-      });
+      self.update(frame);
     });
   };
 

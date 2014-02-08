@@ -1,16 +1,16 @@
 'use strict';
 
-function Screen(canvas, vncClient) {
+function Screen(canvas, buffer) {
+  var bufferCanvas = buffer.getCanvas();
+  this.originalWidth = bufferCanvas.width;
+  this.originalHeight = bufferCanvas.height;
   this.canvas = canvas;
   this.context = canvas.getContext('2d');
-  this.vncClientScreen = vncClient;
-  this.addEventListener();
-  this.resize();
+  this.resize(bufferCanvas);
 }
 
-Screen.prototype.resize = function () {
-  var canvas = this.vncClientScreen.getCanvas(),
-      ratio = canvas.width / canvas.height,
+Screen.prototype.resize = function (canvas) {
+  var ratio = canvas.width / canvas.height,
       width = window.innerWidth,
       height = window.innerHeight;
   this.canvas.width = width;
@@ -19,22 +19,7 @@ Screen.prototype.resize = function () {
     this.canvas.height = height;
     this.canvas.width = height * ratio;
   }
-  this.redraw();
-};
-
-Screen.prototype.resizeHandler = function () {
-  var self = this;
-  return this.resizeHandler = function () {
-    self.resize();
-  };
-};
-
-Screen.prototype.addEventListener = function () {
-  var self = this;
-  this.vncClientScreen.onUpdate(function () {
-    self.redraw();
-  });
-  window.addEventListener('resize', this.resizeHandler(), false);
+  this.redraw(canvas);
 };
 
 Screen.prototype.addMouseHandler = function (cb) {
@@ -49,7 +34,7 @@ Screen.prototype.addMouseHandler = function (cb) {
 
   function getMousePosition(x, y) {
     var c = self.canvas,
-        oc = self.vncClientScreen.getCanvas(),
+        //get the width and height of the base canvas
         pos = c.getBoundingClientRect(),
         width = c.width,
         height = c.height,
@@ -109,15 +94,13 @@ Screen.prototype.addKeyboardHandlers = function (cb) {
   document.addEventListener('keyup', this.keyUpHandler(cb), false);
 };
 
-Screen.prototype.redraw = function () {
-  var canvas = this.vncClientScreen.getCanvas();
+Screen.prototype.redraw = function (canvas) {
   this.context.drawImage(canvas, 0, 0, this.canvas.width, this.canvas.height);
 };
 
 Screen.prototype.destroy = function () {
   document.removeEventListener('keydown', this.keyDownHandler);
   document.removeEventListener('keyup', this.keyUpHandler);
-  window.removeEventListener('resize', this.resizeHandler);
   this.canvas.removeEventListener('contextmenu');
   this.canvas.removeEventListener('mousemove');
   this.canvas.removeEventListener('mousedown');
@@ -148,18 +131,48 @@ VNCClientScreen.prototype.getCanvas = function () {
   return this.canvas;
 };
 
-VNCClientScreen.prototype.onUpdate = function (cb) {
-  this.onUpdateCbs.push(cb);
-};
-
 var VNCScreenDirective = function (VNCClient) {
   return {
     template: '<canvas></canvas>',
+    replace: true,
     restrict: 'E',
     link: function postLink(scope, element, attrs) {
       if (!VNCClient.connected) {
-        element.text('No VNC connection');
+        angular.element('<span>No VNC connection.</span>').insertAfter(element);
+        element.hide();
+        return;
       }
+
+      function frameCallback(buffer, screen) {
+        return function (frame) {
+          buffer.drawRect(frame);
+          screen.redraw(buffer.getCanvas());
+        };
+      }
+
+      function createHiddenCanvas(width, height) {
+        var canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.position = 'absolute';
+        canvas.style.top = -height + 'px';
+        canvas.style.left = -width + 'px';
+        canvas.style.visibility = 'hidden';
+        document.body.appendChild(canvas);
+        return canvas;
+      }
+
+      var bufferCanvas = createHiddenCanvas(VNCClient.screenWidth, VNCClient.screenHeight),
+          buffer = new VNCClientScreen(bufferCanvas),
+          screen = new Screen(element[0], buffer),
+          callback = frameCallback(buffer, screen);
+
+      VNCClient.addFrameCallback(callback);
+
+      scope.$on('$destroy', function () {
+        VNCClient.removeFrameCallback(callback);
+        bufferCanvas.remove();
+      });
     }
   };
 };
