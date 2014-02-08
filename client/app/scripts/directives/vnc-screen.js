@@ -157,7 +157,9 @@ var VNCScreenDirective = function (VNCClient) {
     template: '<canvas></canvas>',
     restrict: 'E',
     link: function postLink(scope, element, attrs) {
-      element.text('this is the vncScreen directive');
+      if (!VNCClient.connected) {
+        element.text('No VNC connection');
+      }
     }
   };
 };

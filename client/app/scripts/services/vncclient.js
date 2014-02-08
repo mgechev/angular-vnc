@@ -41,13 +41,14 @@ function VNCClient($q, Io) {
       this.socket = Io.connect(config.proxyUrl, { 'force new connection': true });
     }
     this.socket.emit('init', {
-      host: config.host,
+      hostname: config.hostname,
       port: config.port,
       password: config.password
     });
     this.addHandlers();
     this.setConnectionTimeout(deferred);
     this.socket.on('init', function (config) {
+      self.connected = true;
       clearTimeout(self.connectionTimeout);
       deferred.resolve();
     });
@@ -56,6 +57,7 @@ function VNCClient($q, Io) {
 
   this.disconnect = function () {
     this.socket.disconnect();
+    this.connected = false;
   };
 
   this.setConnectionTimeout = function (deferred) {

@@ -12,7 +12,7 @@ var RFB = require('rfb'),
 function createRfbConnection(config, socket) {
   try {
     var r = RFB({
-      host: config.host,
+      host: config.hostname,
       port: config.port,
       password: config.password,
       securityType: 'vnc',
