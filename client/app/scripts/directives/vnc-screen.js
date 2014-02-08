@@ -29,7 +29,7 @@ Screen.prototype.addMouseHandler = function (cb) {
       self = this;
 
   function getMask() {
-    var copy = Array.prototype.slice.call(buttonsState);
+    var copy = Array.prototype.slice.call(buttonsState),
         buttons = copy.reverse().join('');
     return parseInt(buttons, 2);
   }
@@ -170,6 +170,8 @@ var VNCScreenDirective = function (VNCClient) {
           callback = frameCallback(buffer, screen);
 
       VNCClient.addFrameCallback(callback);
+      screen.addKeyboardHandlers(VNCClient.sendKeyboardEvent.bind(VNCClient));
+      screen.addMouseHandler(VNCClient.sendMouseEvent.bind(VNCClient));
 
       scope.$on('$destroy', function () {
         VNCClient.removeFrameCallback(callback);
