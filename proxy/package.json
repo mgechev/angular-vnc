@@ -7,9 +7,9 @@
   },
   "dependencies": {
     "socket.io": "~0.9.16",
-    "winston": "~0.7.2",
     "rfb": "~0.2.3",
     "express": "~3.4.8",
-    "http": "0.0.0"
+    "http": "0.0.0",
+    "png": "git+https://github.com/pkrumins/node-png"
   }
 }

@@ -10,8 +10,9 @@ function Screen(canvas, buffer) {
   this.resize(bufferCanvas);
 }
 
-Screen.prototype.resize = function (canvas) {
-  var ratio = canvas.width / canvas.height,
+Screen.prototype.resize = function () {
+  var canvas = this.buffer.getCanvas(),
+      ratio = canvas.width / canvas.height,
       parent = this.canvas.parentNode,
       width = parent.offsetWidth,
       height = parent.offsetHeight;
@@ -21,7 +22,7 @@ Screen.prototype.resize = function (canvas) {
     this.canvas.height = height;
     this.canvas.width = height * ratio;
   }
-  this.redraw(canvas);
+  this.redraw();
 };
 
 Screen.prototype.addMouseHandler = function (cb) {
@@ -77,6 +78,11 @@ Screen.prototype.addMouseHandler = function (cb) {
   }, false);
 };
 
+Screen.prototype.addKeyboardHandlers = function (cb) {
+  document.addEventListener('keydown', this.keyDownHandler(cb), false);
+  document.addEventListener('keyup', this.keyUpHandler(cb), false);
+};
+
 Screen.prototype.keyUpHandler = function (cb) {
   return this.keyUpHandler = function (e) {
     cb.call(null, e.keyCode, e.shiftKey, 1);
@@ -91,12 +97,8 @@ Screen.prototype.keyDownHandler = function (cb) {
   };
 };
 
-Screen.prototype.addKeyboardHandlers = function (cb) {
-  document.addEventListener('keydown', this.keyDownHandler(cb), false);
-  document.addEventListener('keyup', this.keyUpHandler(cb), false);
-};
-
-Screen.prototype.redraw = function (canvas) {
+Screen.prototype.redraw = function () {
+  var canvas = this.buffer.getCanvas();
   this.context.drawImage(canvas, 0, 0, this.canvas.width, this.canvas.height);
 };
 

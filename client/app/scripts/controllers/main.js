@@ -4,11 +4,7 @@ angular.module('clientApp')
   .controller('MainCtrl',
   function ($scope, $location, VNCClient) {
 
-    $scope.host = {
-      hostname: '192.168.100.7',
-      port: 5900,
-      password: 'paralaks'
-    };
+    $scope.host = {};
     $scope.host.proxyUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
 
     $scope.login = function () {
