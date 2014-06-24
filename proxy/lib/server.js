@@ -24,7 +24,6 @@ function createRfbConnection(config, socket) {
 }
 
 function addEventHandlers(r, socket) {
-
   var initialized = false,
       screenWidth, screenHeight;
 
