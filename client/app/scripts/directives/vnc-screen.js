@@ -46,8 +46,8 @@ Screen.prototype.addMouseHandler = function (cb) {
         widthRatio = width / oWidth,
         heightRatio = height / oHeight;
     return {
-      x: x / widthRatio - pos.left,
-      y: y / heightRatio - pos.top
+      x: (x - pos.left) / widthRatio,
+      y: (y - pos.top) / heightRatio
     };
   }
 
