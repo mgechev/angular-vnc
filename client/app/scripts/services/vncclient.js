@@ -31,16 +31,17 @@ function VNCClient($q, Io) {
 
   this.sendKeyboardEvent = function (code, shift, isDown) {
     var rfbKey = this.toRfbKeyCode(code, shift, isDown);
-    if (rfbKey)
+    if (rfbKey) {
       this.socket.emit('keyboard', {
         keyCode: rfbKey,
         isDown: isDown
       });
+    }
   };
 
   this.connect = function (config) {
-    var deferred = $q.defer(),
-        self = this;
+    var deferred = $q.defer();
+    var self = this;
     if (config.forceNewConnection) {
       this.socket = Io.connect(config.proxyUrl);
     } else {
@@ -76,7 +77,7 @@ function VNCClient($q, Io) {
     }, CONNECTION_TIMEOUT);
   };
 
-  this.addHandlers = function (success) {
+  this.addHandlers = function () {
     var self = this;
     this.socket.on('frame', function (frame) {
       self.update(frame);
@@ -85,9 +86,11 @@ function VNCClient($q, Io) {
 
   this.toRfbKeyCode = function (code, shift) {
     var keyMap = VNCClient.keyMap;
-    for (var i = 0, m = keyMap.length; i < m; i++)
-      if (code == keyMap[i][0])
+    for (var i = 0, m = keyMap.length; i < m; i++) {
+      if (code === keyMap[i][0]) {
         return keyMap[i][shift ? 2 : 1];
+      }
+    }
     return null;
   };
 

@@ -11,11 +11,11 @@ function Screen(canvas, buffer) {
 }
 
 Screen.prototype.resize = function () {
-  var canvas = this.buffer.getCanvas(),
-      ratio = canvas.width / canvas.height,
-      parent = this.canvas.parentNode,
-      width = parent.offsetWidth,
-      height = parent.offsetHeight;
+  var canvas = this.buffer.getCanvas();
+  var ratio = canvas.width / canvas.height;
+  var parent = this.canvas.parentNode;
+  var width = parent.offsetWidth;
+  var height = parent.offsetHeight;
   this.canvas.width = width;
   this.canvas.height = width / ratio;
   if (this.canvas.height > height) {
@@ -26,25 +26,25 @@ Screen.prototype.resize = function () {
 };
 
 Screen.prototype.addMouseHandler = function (cb) {
-  var buttonsState = [0, 0, 0],
-      self = this;
+  var buttonsState = [0, 0, 0];
+  var self = this;
 
   function getMask() {
-    var copy = Array.prototype.slice.call(buttonsState),
-        buttons = copy.reverse().join('');
+    var copy = Array.prototype.slice.call(buttonsState);
+    var buttons = copy.reverse().join('');
     return parseInt(buttons, 2);
   }
 
   function getMousePosition(x, y) {
-    var c = self.canvas,
-        oc = self.buffer.getCanvas(),
-        pos = c.getBoundingClientRect(),
-        width = c.width,
-        height = c.height,
-        oWidth = oc.width,
-        oHeight = oc.height,
-        widthRatio = width / oWidth,
-        heightRatio = height / oHeight;
+    var c = self.canvas;
+    var oc = self.buffer.getCanvas();
+    var pos = c.getBoundingClientRect();
+    var width = c.width;
+    var height = c.height;
+    var oWidth = oc.width;
+    var oHeight = oc.height;
+    var widthRatio = width / oWidth;
+    var heightRatio = height / oHeight;
     return {
       x: (x - pos.left) / widthRatio,
       y: (y - pos.top) / heightRatio
@@ -84,17 +84,19 @@ Screen.prototype.addKeyboardHandlers = function (cb) {
 };
 
 Screen.prototype.keyUpHandler = function (cb) {
-  return this.keyUpHandler = function (e) {
+  this.keyUpHandler = function (e) {
     cb.call(null, e.keyCode, e.shiftKey, 1);
     e.preventDefault();
   };
+  return this.keyUpHandler;
 };
 
 Screen.prototype.keyDownHandler = function (cb) {
-  return this.keyDownHandler = function (e) {
+  this.keyDownHandler = function (e) {
     cb.call(null, e.keyCode, e.shiftKey, 0);
     e.preventDefault();
   };
+  return this.keyDownHandler;
 };
 
 Screen.prototype.redraw = function () {
@@ -118,8 +120,8 @@ function VNCClientScreen(canvas) {
 }
 
 VNCClientScreen.prototype.drawRect = function (rect) {
-  var img = new Image(),
-      self = this;
+  var img = new Image();
+  var self = this;
   img.width = rect.width;
   img.height = rect.height;
   img.src = 'data:image/png;base64,' + rect.image;
@@ -140,7 +142,7 @@ var VNCScreenDirective = function (VNCClient) {
     template: '<canvas class="vnc-screen"></canvas>',
     replace: true,
     restrict: 'E',
-    link: function postLink(scope, element, attrs) {
+    link: function postLink(scope, element) {
       if (!VNCClient.connected) {
         angular.element('<span>No VNC connection.</span>').insertAfter(element);
         element.hide();
@@ -166,10 +168,10 @@ var VNCScreenDirective = function (VNCClient) {
         return canvas;
       }
 
-      var bufferCanvas = createHiddenCanvas(VNCClient.screenWidth, VNCClient.screenHeight),
-          buffer = new VNCClientScreen(bufferCanvas),
-          screen = new Screen(element[0], buffer),
-          callback = frameCallback(buffer, screen);
+      var bufferCanvas = createHiddenCanvas(VNCClient.screenWidth, VNCClient.screenHeight);
+      var buffer = new VNCClientScreen(bufferCanvas);
+      var screen = new Screen(element[0], buffer);
+      var callback = frameCallback(buffer, screen);
 
       VNCClient.addFrameCallback(callback);
       screen.addKeyboardHandlers(VNCClient.sendKeyboardEvent.bind(VNCClient));

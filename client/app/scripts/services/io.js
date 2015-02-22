@@ -1,3 +1,4 @@
+/* global io */
 'use strict';
 
 angular.module('clientApp').factory('Io', function () {

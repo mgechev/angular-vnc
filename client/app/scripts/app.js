@@ -11,5 +11,5 @@ angular.module('clientApp', ['ngRoute'])
   .when('/vnc', {
     templateUrl: 'views/vnc.html',
     controller: 'VncCtrl'
-  })
+  });
 });

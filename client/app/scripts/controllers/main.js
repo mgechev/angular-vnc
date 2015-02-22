@@ -14,7 +14,7 @@ angular.module('clientApp')
       } else {
         VNCClient.connect($scope.host)
         .then(function () {
-          $location.path('/vnc')
+          $location.path('/vnc');
         }, function () {
           $scope.errorMessage = 'Connection timeout. Please, try again.';
         });
